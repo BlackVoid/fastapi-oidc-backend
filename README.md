@@ -1,8 +1,10 @@
-# FastAPI Resource Server
+# FastAPI Resource Backend
 
 Build an OIDC resource server using FastAPI.
 
 Your aplication receives the claims decoded from the access token.
+
+Fork of fastapi-resource-server
 
 # Usage
 
@@ -11,7 +13,7 @@ Run keycloak on port 8888:
 ```sh
 docker container run --name auth-server -d -p 8888:8080 \
     -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin \
-    jboss/keycloak:latest
+    quay.io/keycloak/keycloak:latest
 ```
 
 Install dependencies

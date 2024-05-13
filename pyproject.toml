@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "fastapi-resource-server"
-version = "0.1.2"
+name = "fastapi-oidc-backend"
+version = "0.3.0"
 description = "Build resource servers with FastAPI"
-authors = ["Livio Ribeiro <livioribeiro@outlook.com>"]
+authors = ["Felix Gustavsson <github@0b1.se>"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/livioribeiro/fastapi-resource-server"
+repository = "https://github.com/BlackVoid/fastapi-oidc-backend"
 keywords = [ "fastapi", "authentication", "oidc", "openidconnect" ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -28,7 +28,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = "^3.11.2"
 fastapi = "^0"
 python-jose = "^3.2"
 
