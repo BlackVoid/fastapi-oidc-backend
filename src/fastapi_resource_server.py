@@ -17,7 +17,7 @@ from fastapi.security.base import SecurityBase
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import jwt
 from jose.exceptions import JWTError
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from starlette.status import HTTP_401_UNAUTHORIZED
 
 
@@ -45,24 +45,32 @@ def fetch_jwks(well_known: dict) -> dict:
 
 
 class JwtDecodeOptions(BaseModel):
-    verify_signature: Optional[bool]
-    verify_aud: Optional[bool]
-    verify_iat: Optional[bool]
-    verify_exp: Optional[bool]
-    verify_nbf: Optional[bool]
-    verify_iss: Optional[bool]
-    verify_sub: Optional[bool]
-    verify_jti: Optional[bool]
-    verify_at_hash: Optional[bool]
-    require_aud: Optional[bool]
-    require_iat: Optional[bool]
-    require_exp: Optional[bool]
-    require_nbf: Optional[bool]
-    require_iss: Optional[bool]
-    require_sub: Optional[bool]
-    require_jti: Optional[bool]
-    require_at_hash: Optional[bool]
-    leeway: Optional[int]
+    verify_signature: Optional[bool] = Field(default=None)
+    verify_aud: Optional[bool] = Field(default=None)
+    verify_iat: Optional[bool] = Field(default=None)
+    verify_exp: Optional[bool] = Field(default=None)
+    verify_nbf: Optional[bool] = Field(default=None)
+    verify_iss: Optional[bool] = Field(default=None)
+    verify_sub: Optional[bool] = Field(default=None)
+    verify_jti: Optional[bool] = Field(default=None)
+    verify_at_hash: Optional[bool] = Field(default=None)
+    require_aud: Optional[bool] = Field(default=None)
+    require_iat: Optional[bool] = Field(default=None)
+    require_exp: Optional[bool] = Field(default=None)
+    require_nbf: Optional[bool] = Field(default=None)
+    require_iss: Optional[bool] = Field(default=None)
+    require_sub: Optional[bool] = Field(default=None)
+    require_jti: Optional[bool] = Field(default=None)
+    require_at_hash: Optional[bool] = Field(default=None)
+    leeway: Optional[int] = Field(default=None)
+
+
+class JwtKwargs(BaseModel):
+    algorithms: Optional[str] = Field(default=None)
+    audience: Optional[str] = Field(default=None)
+    issuer: Optional[str] = Field(default=None)
+    subject: Optional[str] = Field(default=None)
+    access_token: Optional[str] = Field(default=None)
 
 
 class OidcResourceServer(SecurityBase):
@@ -74,10 +82,12 @@ class OidcResourceServer(SecurityBase):
         allowed_grant_types: List[GrantType] = [GrantType.AUTHORIZATION_CODE],
         auto_error: Optional[bool] = True,
         jwt_decode_options: Optional[JwtDecodeOptions] = None,
+        jwt_decode_kwargs: Optional[JwtKwargs] = None,
     ) -> None:
         self.scheme_name = scheme_name
         self.auto_error = auto_error
         self.jwt_decode_options = jwt_decode_options
+        self.jwt_decode_kwargs = jwt_decode_kwargs or JwtKwargs()
 
         self.well_known = fetch_well_known(issuer)
         self.jwks = fetch_jwks(self.well_known)
@@ -124,10 +134,10 @@ class OidcResourceServer(SecurityBase):
             return None
 
         try:
-            return jwt.decode(param, self.jwks, options=self.jwt_decode_options)
-        except JWTError:
+            return jwt.decode(param, self.jwks, options=self.jwt_decode_options, **self.jwt_decode_kwargs.dict())
+        except JWTError as e:
             raise HTTPException(
                 status_code=HTTP_401_UNAUTHORIZED,
                 detail="JWT validation failed",
                 headers={"WWW-Authenticate": "Bearer"},
-            )
+            ) from e

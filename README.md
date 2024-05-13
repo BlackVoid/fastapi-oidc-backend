@@ -28,12 +28,13 @@ from pydantic import BaseModel
 
 from fastapi_resource_server import JwtDecodeOptions, OidcResourceServer
 
-app = FastAPI()
+decode_options = JwtDecodeOptions(require_aud=True, require_issuer=True)
+decode_kwargs = JwtKwargs(audience="my-client", issuer="http://localhost:8888/auth/realms/master")
 
-decode_options = JwtDecodeOptions(verify_aud=False)
+app = FastAPI(swagger_ui_init_oauth={"clientId": decode_kwargs.audience})
 
 auth_scheme = OidcResourceServer(
-    "http://localhost:8888/auth/realms/master",
+    decode_kwargs.issuer,
     scheme_name="Keycloak",
     jwt_decode_options=decode_options,
 )
