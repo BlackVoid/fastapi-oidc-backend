@@ -11,7 +11,7 @@ Fork of fastapi-resource-server
 Run keycloak on port 8888:
 
 ```sh
-docker container run --name auth-server -d -p 8888:8080 \
+docker container run --name auth-server -d -p 8080:8080 \
     -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin \
     quay.io/keycloak/keycloak:latest
 ```
@@ -19,7 +19,7 @@ docker container run --name auth-server -d -p 8888:8080 \
 Install dependencies
 
 ```sh
-pip install fastapi fastapi_resource_server uvicorn
+pip install fastapi fastapi_oidc_backend uvicorn
 ```
 
 Create the main.py module
@@ -28,17 +28,16 @@ Create the main.py module
 from fastapi import Depends, FastAPI, Security
 from pydantic import BaseModel
 
-from fastapi_resource_server import JwtDecodeOptions, OidcResourceServer
+from fastapi_oidc_backend.security import OidcResourceServer
+from fastapi_oidc_backend.models import JwtKwargs
 
-decode_options = JwtDecodeOptions(require_aud=True, require_issuer=True)
-decode_kwargs = JwtKwargs(audience="my-client", issuer="http://localhost:8888/auth/realms/master")
+oidc_config = JwtKwargs(audience="myclient", issuer="http://localhost:8888/realms/myrealm")
 
-app = FastAPI(swagger_ui_init_oauth={"clientId": decode_kwargs.audience})
+app = FastAPI(swagger_ui_init_oauth={"clientId": oidc_config.audience})
 
 auth_scheme = OidcResourceServer(
-    decode_kwargs.issuer,
+    oidc_config,
     scheme_name="Keycloak",
-    jwt_decode_options=decode_options,
 )
 
 

@@ -1,4 +1,4 @@
-from fastapi_resource_server import GrantType
+from fastapi_oidc_backend.models import GrantType
 
 
 def test_grant_type():
