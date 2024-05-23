@@ -16,7 +16,11 @@ async def app_startup(_app: FastAPI):
 
 oidc_config = JwtKwargs(issuer="http://localhost:8080/realms/myrealm", audience="myclient")
 
-app = FastAPI(lifespan=app_startup, swagger_ui_init_oauth={"clientId": oidc_config.audience})
+app = FastAPI(lifespan=app_startup,
+              swagger_ui_init_oauth={
+                  "clientId": oidc_config.audience,
+                  "usePkceWithAuthorizationCodeGrant": True
+              })
 
 auth_scheme = OidcResourceServer(
     oidc_config,

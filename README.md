@@ -33,7 +33,7 @@ from fastapi_oidc_backend.models import JwtKwargs
 
 oidc_config = JwtKwargs(audience="myclient", issuer="http://localhost:8888/realms/myrealm")
 
-app = FastAPI(swagger_ui_init_oauth={"clientId": oidc_config.audience})
+app = FastAPI(swagger_ui_init_oauth={"clientId": oidc_config.audience, "usePkceWithAuthorizationCodeGrant": True})
 
 auth_scheme = OidcResourceServer(
     oidc_config,

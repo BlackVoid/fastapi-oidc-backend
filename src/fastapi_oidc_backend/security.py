@@ -1,4 +1,3 @@
-import logging
 from typing import List, Optional
 
 import httpx
@@ -52,7 +51,6 @@ class OidcResourceServer(SecurityBase):
         If fetching fails on start a runtime error will be thrown, otherwse a regular Exception
         :return:
         """
-        logging.log(logging.WARN, "Hello")
         try:
             async with httpx.AsyncClient() as client:
                 self.well_known = await self.fetch_well_known(client)
@@ -85,7 +83,6 @@ class OidcResourceServer(SecurityBase):
         if GrantType.IMPLICIT in grant_types:
             self.flows.implicit = OAuthFlowImplicit(authorizationUrl=authz_url)
 
-        print(self.flows)
         self.model = OAuth2Model(flows=self.flows)
 
     async def fetch_well_known(self, client: "httpx.AsyncClient") -> dict:
