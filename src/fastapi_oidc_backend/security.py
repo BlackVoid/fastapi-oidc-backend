@@ -13,8 +13,8 @@ from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.openapi.models import OAuth2 as OAuth2Model
 from fastapi.security.base import SecurityBase
 from fastapi.security.utils import get_authorization_scheme_param
-from jose import jwt
-from jose.exceptions import JWTError
+import jwt
+from jwt import PyJWTError, PyJWKSet
 from starlette.status import HTTP_401_UNAUTHORIZED
 
 from .exceptions import OidcInitException
@@ -43,7 +43,7 @@ class OidcResourceServer(SecurityBase):
         self.model = OAuth2Model(flows=self.flows)
 
         self.well_known: Optional[dict] = None
-        self.jwks: Optional[dict] = None
+        self.jwks: PyJWKSet | None = None
 
     async def load_configuration(self):
         """
@@ -54,7 +54,7 @@ class OidcResourceServer(SecurityBase):
         try:
             async with httpx.AsyncClient() as client:
                 self.well_known = await self.fetch_well_known(client)
-                self.jwks = await self.fetch_jwks(client, self.well_known)
+                self.jwks = PyJWKSet.from_dict(await self.fetch_jwks(client, self.well_known))
         except Exception as e:
             if self.well_known and self.jwks:
                 raise OidcInitException("Failed to refresh OIDC configuration") from e
@@ -114,8 +114,10 @@ class OidcResourceServer(SecurityBase):
             return None
 
         try:
-            return jwt.decode(param, self.jwks, options=self.jwt_decode_options, **self.oidc_config.dict())
-        except JWTError as e:
+            key = self.jwks[jwt.get_unverified_header(param).get("kid")].key
+            algorithms = self.well_known["token_endpoint_auth_signing_alg_values_supported"]
+            return jwt.decode(param, key, algorithms=algorithms, options=self.jwt_decode_options, **self.oidc_config.dict())
+        except (PyJWTError, KeyError) as e:
             raise HTTPException(
                 status_code=HTTP_401_UNAUTHORIZED,
                 detail="JWT validation failed",
