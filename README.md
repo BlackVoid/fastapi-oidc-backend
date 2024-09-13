@@ -25,6 +25,7 @@ pip install fastapi fastapi_oidc_backend uvicorn
 Create the main.py module
 
 ```python
+from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, Security
 from pydantic import BaseModel
 
@@ -33,8 +34,16 @@ from fastapi_oidc_backend.models import JwtKwargs
 
 oidc_config = JwtKwargs(audience="myclient", issuer="http://localhost:8888/realms/myrealm")
 
-app = FastAPI(swagger_ui_init_oauth={"clientId": oidc_config.audience, "usePkceWithAuthorizationCodeGrant": True})
+@asynccontextmanager
+async def app_startup(_app: FastAPI):
+    await auth_scheme.load_configuration()
+    yield
 
+app = FastAPI(lifespan=app_startup,
+              swagger_ui_init_oauth={
+                  "clientId": oidc_config.audience,
+                  "usePkceWithAuthorizationCodeGrant": True
+              })
 auth_scheme = OidcResourceServer(
     oidc_config,
     scheme_name="Keycloak",

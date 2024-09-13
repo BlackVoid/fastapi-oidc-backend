@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastapi-oidc-backend"
-version = "0.5.0"
+version = "0.6.0"
 description = "Build resource servers with FastAPI"
 authors = ["Felix Gustavsson <felix@0b1.se>"]
 license = "MIT"

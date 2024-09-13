@@ -15,9 +15,9 @@ class JwtDecodeOptions(BaseModel):
     verify_signature: Optional[bool] = Field(default=None)
     verify_aud: Optional[bool] = Field(default=True)
     verify_iss: Optional[bool] = Field(default=True)
-    verify_iat: Optional[bool] = Field(default=None)
-    verify_exp: Optional[bool] = Field(default=None)
-    verify_nbf: Optional[bool] = Field(default=None)
+    verify_iat: Optional[bool] = Field(default=True)
+    verify_exp: Optional[bool] = Field(default=True)
+    verify_nbf: Optional[bool] = Field(default=True)
     require: List[str] = Field(default_factory=lambda: [])
 
 

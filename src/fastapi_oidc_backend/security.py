@@ -116,7 +116,7 @@ class OidcResourceServer(SecurityBase):
         try:
             key = self.jwks[jwt.get_unverified_header(param).get("kid")].key
             algorithms = self.well_known["token_endpoint_auth_signing_alg_values_supported"]
-            return jwt.decode(param, key, algorithms=algorithms, options=self.jwt_decode_options, **self.oidc_config.dict())
+            return jwt.decode(param, key, algorithms=algorithms, options=self.jwt_decode_options, **self.oidc_config.model_dump())
         except (PyJWTError, KeyError) as e:
             raise HTTPException(
                 status_code=HTTP_401_UNAUTHORIZED,
